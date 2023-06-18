@@ -8,15 +8,13 @@ import os
 import shutil
 from zipfile import ZipFile
 
-def main():
-    clean_cache()
-    cache_zip(r"C:\Users\Casper\WincBackend\files\data.zip", r"C:\Users\Casper\WincBackend\files\cache")
-    #print(cached_files())
-    print(find_password(cached_files()))
+root_path = os.getcwd()
+cache_path = os.path.join(root_path, "files/cache")
+zip_path = os.path.join(root_path, "files/data.zip")
 
 
 def clean_cache():
-    cache_path = "./files/cache"
+    #Creates the cache folder and if it already exist catch the error in stead clear the folder.
     try:
         os.mkdir(cache_path)
         print("Cache folder created")
@@ -31,27 +29,30 @@ def clean_cache():
 
 
 def cache_zip(zip_path, cache_path):
-    #???# is there a way to chagne the strings in to raw strings by use of a function so r does not need to be entered in the parameters. would make user input easier. tried to use repr() but could not get it to work. can of course change every \ in to \\ or / but find it very messy.
+    #Unpack the Zip File and copies contained files to the cache folder.
     with ZipFile(zip_path, "r") as zObject:
         zObject.extractall(cache_path)
     print("Files unpacked and moved to cache")
 
 
 def cached_files():
+    #Lists the files in the cache.
     cache_path = r"C:\Users\Casper\WincBackend\files\cache"
     absolute_path_list = []
-    for file in os.listdir(cache_path): #???# is there a way to iterate over the list in a mutable manner so i dont have to crate and append to the absolute_path_list but simply can place a return statement in front of the iteration and threby clean up the code
+    for file in os.listdir(cache_path):
         absolute_path_list.append(os.path.join(cache_path, file))
     return absolute_path_list
 
 
 def find_password(file_list):
+    #Finds the document that contains the word password and extracts the actual password from the string.
+    ## I choose to do it this way because i did not want to expect that there was an ":" after the password. With this option the only recuriment is that the actual password is stated after the word "password". but this option is of course a few more lines of code.
     search_string = "password"
     for file_path in file_list:
         try:
             file = open(file_path)
             text = file.read()
-            #file.close() #???# Does it give sence to close the file again in order to save memory?
+            file.close()
             index = text.find(search_string)
             if index >= 0:
                 text_lines = text.splitlines()
@@ -67,5 +68,6 @@ def find_password(file_list):
 
 
 if __name__ == '__main__':
-    main()
-
+    clean_cache()
+    cache_zip(zip_path, cache_path)
+    print(find_password(cached_files()))
